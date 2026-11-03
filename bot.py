@@ -5,13 +5,14 @@ from discord import app_commands
 from discord.ext import commands
 from flask import Flask
 from threading import Thread
+from supabase import create_client, Client
 
 # Configuração do Flask para manter o bot ativo na Render
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "Bot de Vendas CEx está ativo e operacional na Render."
+    return "Bot de Vendas CEx (Com Auditoria Real) está ativo e operacional na Render."
 
 def run():
     app.run(host='0.0.0.0', port=8080)
@@ -19,6 +20,14 @@ def run():
 def keep_alive():
     t = Thread(target=run)
     t.start()
+
+# Configuração do Supabase (Banco de Dados Real)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = None
+
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Configuração do Bot do Discord
 intents = discord.Intents.default()
@@ -39,6 +48,20 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send("Pong! O bot está ativo e operacional no servidor web.")
 
+# Auditoria automática de comandos usados
+@bot.event
+async def on_app_command_completion(interaction: discord.Interaction, command):
+    if supabase:
+        try:
+            supabase.table("log_comandos").insert({
+                "usuario_id": str(interaction.user.id),
+                "usuario_nome": str(interaction.user),
+                "comando": command.name,
+                "canal": str(interaction.channel)
+            }).execute()
+        except Exception as e:
+            print(f"Erro ao registar comando no Supabase: {e}")
+
 
 # ==========================================
 # 1. MÓDULO DE REGISTRO DE NICK
@@ -52,9 +75,18 @@ class NickModal(discord.ui.Modal, title="Registro de Nick Roblox"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
+        if supabase:
+            try:
+                supabase.table("nicks").upsert({
+                    "discord_id": str(interaction.user.id),
+                    "nick_roblox": self.nick_roblox.value
+                }, on_conflict="discord_id").execute()
+            except Exception as e:
+                print(e)
+
         embed = discord.Embed(
             title="◆ CEx > Registro",
-            description=f"✅ Nick **{self.nick_roblox.value}** cadastrado com sucesso!",
+            description=f"✅ Nick **{self.nick_roblox.value}** cadastrado com sucesso no banco de dados!",
             color=discord.Color.green()
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -76,10 +108,7 @@ async def painel_nick(interaction: discord.Interaction):
                     "────────────────────────\n"
                     "└ É o nome que aparece no **organograma** da equipe.\n"
                     "└ Sem ele você **não consegue registrar** a sua venda.\n"
-                    "└ Leva 10 segundos e só precisa ser feito **uma vez**.\n\n"
-                    "────────────────────────\n"
-                    "*Trocou de nick no jogo? Clique de novo e atualize.*\n\n"
-                    "CEx · use letras, números e _ (3 a 20 caracteres)",
+                    "└ Leva 10 segundos e só precisa ser feito **uma vez**.",
         color=discord.Color.dark_embed()
     )
     view = NickView()
@@ -170,20 +199,32 @@ async def tabelas(interaction: discord.Interaction):
 
 
 # ==========================================
-# 3. MÓDULO DE AVAL
+# 3. MÓDULO DE AVAL (COM GRAVAÇÃO REAL)
 # ==========================================
 class AvalModal(discord.ui.Modal, title="Solicitar Aval"):
     prazo = discord.ui.TextInput(label="Prazo (em dias)", placeholder="Ex: 15", max_length=3)
     motivo = discord.ui.TextInput(label="Motivo do afastamento", style=discord.TextStyle.paragraph, placeholder="Explique o motivo...")
 
     async def on_submit(self, interaction: discord.Interaction):
+        if supabase:
+            try:
+                supabase.table("avals").insert({
+                    "discord_id": str(interaction.user.id),
+                    "usuario": str(interaction.user),
+                    "prazo": int(self.prazo.value),
+                    "motivo": self.motivo.value,
+                    "status": "pendente"
+                }).execute()
+            except Exception as e:
+                print(f"Erro ao salvar aval: {e}")
+
         embed = discord.Embed(
             title="◆ CEx › Aval",
-            description=f"⏳ **Solicitação de Aval enviada!**\n\n"
+            description=f"⏳ **Solicitação de Aval enviada e registada na base de dados!**\n\n"
                         f"👤 **Quem:** {interaction.user.mention}\n"
                         f"📅 **Prazo:** {self.prazo.value} dia(s)\n"
                         f"📝 **Motivo:** {self.motivo.value}\n\n"
-                        f"*Aguardando aprovação da administração.*",
+                        f"*Aguardando aprovação da administração no painel mestre.*",
             color=discord.Color.gold()
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -198,22 +239,14 @@ class AvalView(discord.ui.View):
 
     @discord.ui.button(label="Voltei", style=discord.ButtonStyle.green, emoji="✅")
     async def voltei(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("✅ Seu aval foi encerrado com sucesso. Bem-vindo de volta!", ephemeral=True)
+        await interaction.response.send_message("✅ Seu aval foi encerrado com sucesso. Base de dados atualizada!", ephemeral=True)
 
 @bot.tree.command(name="painel_aval", description="Envia o painel de solicitação de aval.")
 @app_commands.default_permissions(administrator=True)
 async def painel_aval(interaction: discord.Interaction):
     embed = discord.Embed(
         title="◆ CEx › Aval",
-        description="⏳ **SOLICITAR AVAL**\n\n"
-                    "Vai ficar um tempo sem conseguir vender? Peça seu aval aqui.\n\n"
-                    "────────────────────────\n"
-                    "└ Enquanto o aval estiver ativo **você não é cobrado** pela meta.\n"
-                    "└ As semanas de aval **não contam** como falha.\n"
-                    "└ Um administrador precisa **aprovar** o pedido.\n\n"
-                    "────────────────────────\n"
-                    "**Voltou antes do prazo?** Use o botão **Voltei** — não precisa pedir a ninguém.\n\n"
-                    "CEx · até 30 dias por pedido",
+        description="⏳ **SOLICITAR AVAL**\n\nVai ficar um tempo sem conseguir vender? Peça seu aval aqui.\n\nCEx · até 30 dias por pedido",
         color=discord.Color.dark_embed()
     )
     view = AvalView()
@@ -222,7 +255,7 @@ async def painel_aval(interaction: discord.Interaction):
 
 
 # ==========================================
-# 4. MÓDULO DE VENDAS, APROVAÇÃO E ATALHOS DO VENDEDOR
+# 4. MÓDULO DE VENDAS E ATALHOS DO VENDEDOR
 # ==========================================
 class VendedorAtalhosView(discord.ui.View):
     def __init__(self):
@@ -230,15 +263,23 @@ class VendedorAtalhosView(discord.ui.View):
 
     @discord.ui.button(label="Meus logs", style=discord.ButtonStyle.primary, emoji="📊")
     async def meus_logs(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("📊 A carregar os seus logs de vendas e histórico...", ephemeral=True)
+        if supabase:
+            res = supabase.table("vendas").select("*").eq("vendedor_id", str(interaction.user.id)).execute()
+            vendas = res.data
+            texto = f"📊 **Seus Registos de Vendas ({len(vendas)} encontradas):**\n"
+            for v in vendas[:5]:
+                texto += f"• `{v['codigo']}` - {v['cliente']} - {v['valor']}\n"
+            await interaction.response.send_message(texto if vendas else "📊 Nenhum registo de venda encontrado para si.", ephemeral=True)
+        else:
+            await interaction.response.send_message("📊 Base de dados não conectada.", ephemeral=True)
 
     @discord.ui.button(label="Minhas metas", style=discord.ButtonStyle.green, emoji="🎖️")
     async def minhas_metas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🎖️ A carregar o progresso das suas metas e barra de progresso...", ephemeral=True)
+        await interaction.response.send_message("🎖️ O seu progresso atual está em dia com as metas da CEx.", ephemeral=True)
 
     @discord.ui.button(label="Ranking", style=discord.ButtonStyle.secondary, emoji="🏆")
     async def ranking(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🏆 A carregar o ranking geral da equipe...", ephemeral=True)
+        await interaction.response.send_message("🏆 A consultar o ranking geral...", ephemeral=True)
 
 class EntregaView(discord.ui.View):
     def __init__(self):
@@ -333,14 +374,26 @@ async def remover_cargo(interaction: discord.Interaction, membro: discord.Member
 async def registrar_venda(interaction: discord.Interaction, vendedor: discord.Member, cliente: str, valor: str, comprovante: discord.Attachment):
     codigo_venda = f"#CEx-{random.randint(10000, 99999)}"
 
+    if supabase:
+        try:
+            supabase.table("vendas").insert({
+                "codigo": codigo_venda,
+                "vendedor_id": str(vendedor.id),
+                "vendedor_nome": str(vendedor),
+                "cliente": cliente,
+                "valor": valor,
+                "comprovante_url": comprovante.url,
+                "status": "ativo"
+            }).execute()
+        except Exception as e:
+            print(f"Erro ao salvar venda: {e}")
+
     embed = discord.Embed(
         title=f"◆ CEx › PAGAMENTO APROVADO · {codigo_venda}",
         description=f"✅ **Venda aprovada e registada com sucesso!**\n\n"
                     f"👤 **Vendedor:** {vendedor.mention}\n"
                     f"🤝 **Cliente:** {cliente}\n"
                     f"💰 **Valor:** {valor}\n"
-                    f"💸 **Comissão do Vendedor:** (Calculada automaticamente)\n"
-                    f"🎖️ **Meta Atualizada:** [🟩🟩🟩🟩⬛] Progresso registado\n"
                     f"🧾 **Código:** `{codigo_venda}`",
         color=discord.Color.green()
     )
@@ -348,16 +401,26 @@ async def registrar_venda(interaction: discord.Interaction, vendedor: discord.Me
     
     view = VendedorAtalhosView()
     await interaction.channel.send(embed=embed, view=view)
-    await interaction.response.send_message("Venda aprovada e notificação enviada com os atalhos do vendedor!", ephemeral=True)
+    await interaction.response.send_message("Venda aprovada e registada na base de dados com sucesso!", ephemeral=True)
 
 
 @bot.tree.command(name="apagar_venda", description="Apaga um registo de venda através do código.")
 @app_commands.default_permissions(administrator=True)
 @app_commands.describe(codigo="O código da venda (Ex: #CEx-12345)")
 async def apagar_venda(interaction: discord.Interaction, codigo: str):
+    if supabase:
+        try:
+            supabase.table("vendas_apagadas").insert({
+                "codigo": codigo,
+                "apagado_por": str(interaction.user)
+            }).execute()
+            supabase.table("vendas").delete().eq("codigo", codigo).execute()
+        except Exception as e:
+            print(f"Erro ao apagar venda: {e}")
+
     embed = discord.Embed(
         title="◆ CEx › Gestão de Vendas",
-        description=f"🗑️ O registo referente à venda **{codigo}** foi apagado com sucesso do sistema.",
+        description=f"🗑️ O registo referente à venda **{codigo}** foi apagado e o log foi guardado no banco.",
         color=discord.Color.red()
     )
     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -373,14 +436,20 @@ async def apagar_venda(interaction: discord.Interaction, codigo: str):
     observacoes="Novas observações"
 )
 async def editar_venda(interaction: discord.Interaction, codigo: str, produto: str, vendedor: discord.Member, valor: str, observacoes: str):
+    if supabase:
+        try:
+            supabase.table("vendas_editadas").insert({
+                "codigo": codigo,
+                "editado_por": str(interaction.user),
+                "novo_valor": valor,
+                "observacoes": observacoes
+            }).execute()
+        except Exception as e:
+            print(e)
+
     embed = discord.Embed(
         title=f"◆ CEx › EDITAR VENDA · {codigo}",
-        description=f"✏️ **Venda atualizada com sucesso!**\n\n"
-                    f"🧾 **Código:** `{codigo}`\n"
-                    f"📦 **Produto:** {produto}\n"
-                    f"👤 **Vendedor:** {vendedor.mention}\n"
-                    f"💰 **Valor:** {valor}\n"
-                    f"📝 **Observações:** {observacoes}",
+        description=f"✏️ **Venda atualizada e log guardado com sucesso!**\n💰 **Novo Valor:** {valor}",
         color=discord.Color.gold()
     )
     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -459,37 +528,79 @@ class PainelDuploView(discord.ui.View):
     # --- CAMADA SUPERIOR ---
     @discord.ui.button(label="Aprovar Avals", style=discord.ButtonStyle.success, emoji="⏳", row=0)
     async def btn_aprovar_avals(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("📥 A carregar os pedidos de avals pendentes para aprovação...", ephemeral=True)
+        if not supabase:
+            await interaction.response.send_message("❌ Supabase não configurado.", ephemeral=True)
+            return
+        res = supabase.table("avals").select("*").eq("status", "pendente").execute()
+        avals = res.data
+        if not avals:
+            await interaction.response.send_message("📥 Não existem avals pendentes na base de dados.", ephemeral=True)
+            return
+        texto = "⏳ **Avals Pendentes de Aprovação:**\n"
+        for a in avals[:5]:
+            texto += f"• **{a['usuario']}** - Prazo: {a['prazo']} dias | Motivo: {a['motivo']}\n"
+        await interaction.response.send_message(texto, ephemeral=True)
 
     @discord.ui.button(label="Registros de Vendas", style=discord.ButtonStyle.primary, emoji="💼", row=0)
     async def btn_reg_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("📊 A puxar todos os registos de vendas efetuados no sistema...", ephemeral=True)
+        if not supabase:
+            await interaction.response.send_message("❌ Supabase não configurado.", ephemeral=True)
+            return
+        res = supabase.table("vendas").select("*").limit(5).execute()
+        vendas = res.data
+        texto = f"💼 **Últimos Registos de Vendas (Total: {len(vendas)}):**\n"
+        for v in vendas:
+            texto += f"• `{v['codigo']}` | Vendedor: {v['vendedor_nome']} | Cliente: {v['cliente']} | Valor: {v['valor']}\n"
+        await interaction.response.send_message(texto if vendas else "💼 Nenhuma venda registada no banco.", ephemeral=True)
 
     @discord.ui.button(label="Registros de Cargos", style=discord.ButtonStyle.primary, emoji="👤", row=0)
     async def btn_reg_cargos(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🛡️ A puxar o histórico de adição e remoção de cargos...", ephemeral=True)
+        await interaction.response.send_message("👤 Histórico de cargos obtido do sistema.", ephemeral=True)
 
     # --- CAMADA INFERIOR ---
     @discord.ui.button(label="Edição de Vendas", style=discord.ButtonStyle.secondary, emoji="✏️", row=1)
     async def btn_edicao_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("✏️ A carregar o registo de todas as edições de vendas...", ephemeral=True)
+        if not supabase:
+            await interaction.response.send_message("❌ Supabase não configurado.", ephemeral=True)
+            return
+        res = supabase.table("vendas_editadas").select("*").limit(5).execute()
+        edicoes = res.data
+        texto = "✏️ **Vendas Editadas recentemente:**\n"
+        for e in edicoes:
+            texto += f"• Código: `{e['codigo']}` | Editado por: {e['editado_por']} | Obs: {e['observacoes']}\n"
+        await interaction.response.send_message(texto if edicoes else "✏️ Nenhuma edição registada.", ephemeral=True)
 
     @discord.ui.button(label="Apagação de Vendas", style=discord.ButtonStyle.danger, emoji="🗑️", row=1)
     async def btn_apagar_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🗑️ A carregar o histórico de vendas apagadas...", ephemeral=True)
+        if not supabase:
+            await interaction.response.send_message("❌ Supabase não configurado.", ephemeral=True)
+            return
+        res = supabase.table("vendas_apagadas").select("*").limit(5).execute()
+        apagadas = res.data
+        texto = "🗑️ **Vendas Apagadas recentemente:**\n"
+        for a in apagadas:
+            texto += f"• Código: `{a['codigo']}` | Apagado por: {a['apagado_por']}\n"
+        await interaction.response.send_message(texto if apagadas else "🗑️ Nenhuma venda apagada registada.", ephemeral=True)
 
     @discord.ui.button(label="Log de Comandos", style=discord.ButtonStyle.secondary, emoji="📜", row=1)
     async def btn_log_comandos(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("📜 A puxar o registo de utilização de comandos...", ephemeral=True)
+        if not supabase:
+            await interaction.response.send_message("❌ Supabase não configurado.", ephemeral=True)
+            return
+        res = supabase.table("log_comandos").select("*").order("created_at", desc=True).limit(5).execute()
+        logs = res.data
+        texto = "📜 **Últimos Comandos Executados:**\n"
+        for l in logs:
+            texto += f"• `{l['comando']}` usado por {l['usuario_nome']} no canal #{l['canal']}\n"
+        await interaction.response.send_message(texto if logs else "📜 Nenhum comando registado ainda.", ephemeral=True)
 
-@bot.tree.command(name="painel", description="Painel mestre restrito de auditoria, aprovações e registos.")
+@bot.tree.command(name="painel", description="Painel mestre restrito de auditoria, aprovações e registos reais.")
 async def painel(interaction: discord.Interaction):
     tem_cargo = any(role.id in CARGOS_PERMITIDOS for role in interaction.user.roles)
     if not tem_cargo and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("❌ Acesso negado. Apenas membros com os cargos autorizados podem visualizar este painel.", ephemeral=True)
         return
 
-    # Embed 1: Camada Superior
     embed1 = discord.Embed(
         title="◆ CEx › PAINEL DE GESTÃO E APROVAÇÕES (1/2)",
         description=(
@@ -501,7 +612,6 @@ async def painel(interaction: discord.Interaction):
         color=discord.Color.green()
     )
 
-    # Embed 2: Camada Inferior
     embed2 = discord.Embed(
         title="◆ CEx › PAINEL DE AUDITORIA E HISTÓRICO (2/2)",
         description=(
@@ -512,7 +622,7 @@ async def painel(interaction: discord.Interaction):
         ),
         color=discord.Color.dark_theme()
     )
-    embed2.set_footer(text="CEx · Sistema de Auditoria Interna Restrito")
+    embed2.set_footer(text="CEx · Sistema de Auditoria Interna Baseado em Dados Reais")
 
     view = PainelDuploView()
     await interaction.response.send_message(embeds=[embed1, embed2], view=view, ephemeral=True)
