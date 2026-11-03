@@ -88,165 +88,85 @@ async def painel_nick(interaction: discord.Interaction):
 
 
 # ==========================================
-# 2. MÓDULO DE TABELAS (PAINEL INTERATIVO COM BOTÕES)
+# 2. MÓDULO UNIFICADO DE TABELAS (/TABELAS)
 # ==========================================
-class TabelasView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="Minérios", style=discord.ButtonStyle.primary, emoji="💎")
-    async def btn_minerios(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="💎 CEx › Tabela Preços & Benefícios (Minérios)",
-            description=(
-                "## __Tabela Preços Minérios__\n\n"
-                "**__Opala__** - *250R$* • ***Min. 200R$***\n\n"
-                "**__Jade__** - *180R$* • ***Min. 135R$***\n\n"
-                "**__Safira__** - *130R$* • ***Min. 100R$***\n\n"
-                "**__Ruby__** - *80R$* • ***Min. 65R$***\n\n"
-                "**__Iron__** - *45R$* • ***Min. 30R$***\n\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                "# Benefícios Minérios\n"
-                "————————————————\n\n"
-                "**__• Opala__** <:seta_1:1562090158902218824> *Permissões: Mute, Gerenciar Apelidos, Mudar Apelido, Gerenciar Mensagens, Ver Canais, Voz Prioritária, Imune Modo Lento, Etc…*\n\n"
-                "**__• Jade__** <:seta_1:1562090158902218824> *Permissões: Mute, Mudar Apelido, Ver Canais, Voz Prioritária, Imune Modo Lento, Etc…*\n\n"
-                "**__• Safira__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Ver Canais, Imune Modo Lento, Etc…*\n\n"
-                "**__• Ruby__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Ver Canais, Etc…*\n\n"
-                "**__• Iron__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Etc…*"
-            ),
-            color=discord.Color.blue()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @discord.ui.button(label="Patentes Exército", style=discord.ButtonStyle.success, emoji="🎖️")
-    async def btn_patentes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="🎖️ CEx › Tabela de Preços de Patentes",
-            description=(
-                "# TABELA DE PREÇOS\n\n"
-                "## Economia Inicial\n\n"
-                "**Atenção:** As patentes são mais baratas dependendo da sua patente atual.\n\n"
-                "-# Todos os valores estão sujeitos aos descontos por patente.\n\n"
-                "**__Cargos Especiais__**\n\n"
-                "**• | Vendedor — R$:125**\n\n"
-                "**• | Cargo Personalizado (Sem Permissão) — R$:250**\n\n"
-                "**• | Cargo Personalizado (Com Permissão) — R$:450**\n\n"
-                "**• | Patente Personalizada — R$:850**\n\n"
-                "-# Mesmo nível de permissão do Sub Criador.\n\n"
-                "**__Criadores__**\n\n"
-                "**• | [CR] Criador — Não está à venda**\n\n"
-                "**• | [SCR] Sub Criador — Não está à venda**\n\n"
-                "**__Supremacia__**\n\n"
-                "**• | [SC] Sócio — R$:180**\n\n"
-                "**• | [INV] Investidor — R$:150**\n\n"
-                "**__Governo Federal__**\n\n"
-                "**• | [PRES] Presidente — Só por votação**\n\n"
-                "**• | [V PRES] Vice-Presidente — Não está à venda**\n\n"
-                "**__Alto Escalão__**\n\n"
-                "**• | [CMT] Comandante — Não está à venda**\n\n"
-                "**• | [SUB-CMT] Subcomandante — Não está à venda**\n\n"
-                "**__Oficiais Soberanos__**\n\n"
-                "**• | [SB] Soberano — R$:120**\n\n"
-                "**• | [PA] Patriarca — R$:105**\n\n"
-                "**• | [SP] Sub-Patriarca — R$:90**\n\n"
-                "**__Oficiais Generais__**\n\n"
-                "**• | [GEN EX] General de Exército — R$:70**\n\n"
-                "**• | [GEN DIV] General de Divisão — R$:65**\n\n"
-                "**• | [GEN BDA] General de Brigada — R$:60**\n\n"
-                "**• | [GEN-T] General em Treinamento — R$:55**\n\n"
-                "**__Oficiais Superiores__**\n\n"
-                "**• | [CEL] Coronel — R$:50**\n\n"
-                "**• | [TEN CEL] Tenente-Coronel — R$:45**\n\n"
-                "**• | [MAJ] Major — R$:40**\n\n"
-                "**__Oficiais Intermediários__**\n\n"
-                "**• | [CAP] Capitão — R$:35**\n\n"
-                "**__Oficiais Subalternos__**\n\n"
-                "**• | [1º TEN] Primeiro Tenente — R$:30**\n\n"
-                "**• | [2º TEN] Segundo Tenente — R$:25**\n\n"
-                "**• | [ASP] Aspirante a Oficial — R$:20**\n\n"
-                "**__Praças Especiais__**\n\n"
-                "**• | [CT] Cadete — R$:18**\n\n"
-                "**__Graduados__**\n\n"
-                "**• | [ST] Subtenente — R$:15**\n\n"
-                "**• | [1º SGT] Primeiro Sargento — R$:12**\n\n"
-                "**• | [2º SGT] Segundo Sargento — R$:9**\n\n"
-                "**• | [3º SGT] Terceiro Sargento — R$:6**"
-            ),
-            color=discord.Color.dark_gold()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @discord.ui.button(label="Instituições", style=discord.ButtonStyle.secondary, emoji="🏛️")
-    async def btn_instituicoes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="🏛️ CEx › Tabela de Instituições",
-            description=(
-                "# Tabela Instituições\n"
-                "————————————————\n\n"
-                "<:STM:1565814378379608104> **__STM__**<:STM:1565814378379608104> \n\n"
-                "Ministro - **__150R$__** • *Mín. 125R$*\n\n"
-                "Ministro Substituto - **__100__** • *Mín. 85*\n\n"
-                "————————————————\n\n"
-                "<:juizado:1565814125366345788> **__OAEx__** <:juizado:1565814125366345788> \n\n"
-                "Advogado - **__80R$__** • *Mín. 68* \n\n"
-                "Estagiário Jurídico - **__50R$__** • *Mín. 45*\n\n"
-                "————————————————\n\n"
-                "<:pj:1565814664934330460> **__Defensoria__** <:pj:1565814664934330460> \n\n"
-                "Defensor - **__80R$__** • *Mín. 68*\n\n"
-                "Estagiário da Defensoria - **__50R$__** • *Mín. 45*\n\n"
-                "————————————————\n\n"
-                "<:SupremoTribunal:1565814182992019646> **__MPM__** <:SupremoTribunal:1565814182992019646> \n\n"
-                "Promotor - **__120R$__** • *Mín.  100*\n\n"
-                "Estagiário da Procuradoria - **__80R$__** • *Mín. 65*\n\n"
-                "————————————————\n\n"
-                "<:SGEx:1565814327762624513> **__SGEx__** <:SGEx:1565814327762624513> \n\n"
-                "*Vendemos apenas Entrada na SGEx, ou seja, Estagiário, outros cargos da SGEx não são vendidos* \n\n"
-                "Valor - **__150R$__** • *Mín. 128*"
-            ),
-            color=discord.Color.blue()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @discord.ui.button(label="Divisões", style=discord.ButtonStyle.secondary, emoji="💼")
-    async def btn_divisoes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="💼 CEx › Tabela de Divisões",
-            description="⚠️ *De momento não existem divisões cadastradas para venda.*",
-            color=discord.Color.dark_grey()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @discord.ui.button(label="Patentes Administrativas", style=discord.ButtonStyle.primary, emoji="📋")
-    async def btn_adm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(
-            title="📋 CEx › Patentes Administrativas",
-            description=(
-                "# Patentes Administrativas \n"
-                "————————————————\n"
-                "*Atenção, patentes administrativas devem ser negociadas apenas com <@&1542240355385090106> ou Superior.*\n"
-                "————————————————\n\n"
-                "Diretor Geral Administrativo - **__Não Está a Venda__**\n\n"
-                "Diretor Administrativo - **__3.800R$__** • *Mín. 3.680R$*\n\n"
-                "Fiscal Administrativo - **__2.890R$__** • *Mín. 2.750$*\n\n"
-                "Estagiário Administrativo - **__2.000R$__** • *Mín. 1.890R$*\n"
-                "————————————————\n\n"
-                "***Caso alguém esteja realmente interessado na compra de uma patente administrativa, chamar um Fiscal de Vendas ou Superior para continuar a negociação.***"
-            ),
-            color=discord.Color.purple()
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
 @bot.tree.command(name="tabelas", description="Envia o painel unificado com todas as tabelas de preços da CEx.")
 @app_commands.default_permissions(administrator=True)
 async def tabelas(interaction: discord.Interaction):
     embed = discord.Embed(
-        title="◆ CEx › CENTRAL DE TABELAS",
-        description="Selecione abaixo qual tabela de preços deseja consultar:",
+        title="◆ CEx › CENTRAL DE TABELAS OFICIAIS",
+        description=(
+            "────────────────────────────────────────\n"
+            "💎 **1. MINÉRIOS & BENEFÍCIOS**\n"
+            "## __Tabela Preços Minérios__\n"
+            "**__Opala__** - *250R$* • ***Min. 200R$***\n"
+            "**__Jade__** - *180R$* • ***Min. 135R$***\n"
+            "**__Safira__** - *130R$* • ***Min. 100R$***\n"
+            "**__Ruby__** - *80R$* • ***Min. 65R$***\n"
+            "**__Iron__** - *45R$* • ***Min. 30R$***\n\n"
+            "# Benefícios Minérios\n"
+            "————————————————\n"
+            "**__• Opala__** <:seta_1:1562090158902218824> *Permissões: Mute, Gerenciar Apelidos, Mudar Apelido, Gerenciar Mensagens, Ver Canais, Voz Prioritária, Imune Modo Lento, Etc…*\n"
+            "**__• Jade__** <:seta_1:1562090158902218824> *Permissões: Mute, Mudar Apelido, Ver Canais, Voz Prioritária, Imune Modo Lento, Etc…*\n"
+            "**__• Safira__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Ver Canais, Imune Modo Lento, Etc…*\n"
+            "**__• Ruby__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Ver Canais, Etc…*\n"
+            "**__• Iron__** <:seta_1:1562090158902218824> *Permissões: Mudar Apelido, Etc…*\n\n"
+            "────────────────────────────────────────\n"
+            "🎖️ **2. PATENTES DO EXÉRCITO**\n"
+            "# TABELA DE PREÇOS\n"
+            "## Economia Inicial\n"
+            "**Atenção:** As patentes são mais baratas dependendo da sua patente atual.\n"
+            "-# Todos os valores estão sujeitos aos descontos por patente.\n\n"
+            "**__Cargos Especiais__**\n"
+            "• | Vendedor — R$:125\n"
+            "• | Cargo Personalizado (Sem Permissão) — R$:250\n"
+            "• | Cargo Personalizado (Com Permissão) — R$:450\n"
+            "• | Patente Personalizada — R$:850 (-# Mesmo nível de permissão do Sub Criador)\n\n"
+            "**__Criadores__** • [CR] Criador / [SCR] Sub Criador — *Não está à venda*\n"
+            "**__Supremacia__** • [SC] Sócio — **R$:180** | [INV] Investidor — **R$:150**\n"
+            "**__Governo Federal__** • [PRES] Presidente — *Só por votação* | [V PRES] Vice — *Não está à venda*\n"
+            "**__Alto Escalão__** • Comandante / Subcomandante — *Não está à venda*\n"
+            "**__Oficiais Soberanos__** • [SB] Soberano — **R$:120** | [PA] Patriarca — **R$:105** | [SP] Sub-Patriarca — **R$:90**\n"
+            "**__Oficiais Generais__** • [GEN EX] — **R$:70** | [GEN DIV] — **R$:65** | [GEN BDA] — **R$:60** | [GEN-T] — **R$:55**\n"
+            "**__Oficiais Superiores__** • [CEL] — **R$:50** | [TEN CEL] — **R$:45** | [MAJ] — **R$:40**\n"
+            "**__Oficiais Intermediários__** • [CAP] — **R$:35**\n"
+            "**__Oficiais Subalternos__** • [1º TEN] — **R$:30** | [2º TEN] — **R$:25** | [ASP] — **R$:20**\n"
+            "**__Praças Especiais__** • [CT] Cadete — **R$:18**\n"
+            "**__Graduados__** • [ST] — **R$:15** | [1º SGT] — **R$:12** | [2º SGT] — **R$:9** | [3º SGT] — **R$:6**\n\n"
+            "────────────────────────────────────────\n"
+            "🏛️ **3. INSTITUIÇÕES**\n"
+            "# Tabela Instituições\n"
+            "————————————————\n"
+            "<:STM:1565814378379608104> **__STM__**\n"
+            "Ministro - **__150R$__** • *Mín. 125R$* | Ministro Substituto - **__100__** • *Mín. 85*\n\n"
+            "<:juizado:1565814125366345788> **__OAEx__**\n"
+            "Advogado - **__80R$__** • *Mín. 68* | Estagiário Jurídico - **__50R$__** • *Mín. 45*\n\n"
+            "<:pj:1565814664934330460> **__Defensoria__**\n"
+            "Defensor - **__80R$__** • *Mín. 68* | Estagiário da Defensoria - **__50R$__** • *Mín. 45*\n\n"
+            "<:SupremoTribunal:1565814182992019646> **__MPM__**\n"
+            "Promotor - **__120R$__** • *Mín. 100* | Estagiário da Procuradoria - **__80R$__** • *Mín. 65*\n\n"
+            "<:SGEx:1565814327762624513> **__SGEx__**\n"
+            "*Vendemos apenas Entrada na SGEx (Estagiário)* — Valor: **__150R$__** • *Mín. 128*\n\n"
+            "────────────────────────────────────────\n"
+            "💼 **4. DIVISÕES**\n"
+            "⚠️ *Atualmente não há divisões cadastradas para venda.*\n\n"
+            "────────────────────────────────────────\n"
+            "📋 **5. PATENTES ADMINISTRATIVAS**\n"
+            "# Patentes Administrativas \n"
+            "————————————————\n"
+            "*Atenção, patentes administrativas devem ser negociadas apenas com <@&1542240355385090106> ou Superior.*\n"
+            "————————————————\n"
+            "Diretor Geral Administrativo - **__Não Está a Venda__**\n"
+            "Diretor Administrativo - **__3.800R$__** • *Mín. 3.680R$*\n"
+            "Fiscal Administrativo - **__2.890R$__** • *Mín. 2.750$*\n"
+            "Estagiário Administrativo - **__2.000R$__** • *Mín. 1.890R$*\n"
+            "————————————————\n"
+            "***Caso alguém esteja realmente interessado na compra de uma patente administrativa, chamar um Fiscal de Vendas ou Superior para continuar a negociação.***"
+        ),
         color=discord.Color.dark_theme()
     )
-    view = TabelasView()
-    await interaction.channel.send(embed=embed, view=view)
-    await interaction.response.send_message("Painel de tabelas enviado com sucesso!", ephemeral=True)
+    await interaction.channel.send(embed=embed)
+    await interaction.response.send_message("Painel unificado de tabelas enviado com sucesso!", ephemeral=True)
 
 
 # ==========================================
@@ -361,7 +281,7 @@ async def add_cargo(interaction: discord.Interaction, membro: discord.Member, ca
 
 @bot.tree.command(name="remover_cargo", description="Remove um cargo de um membro selecionado.")
 @app_commands.default_permissions(manage_roles=True)
-@app_commands.describe(membro="O membro do cual deseja remover o cargo", cargo="O cargo a ser removido")
+@app_commands.describe(membro="O membro do qual deseja remover o cargo", cargo="O cargo a ser removido")
 async def remover_cargo(interaction: discord.Interaction, membro: discord.Member, cargo: discord.Role):
     if cargo not in membro.roles:
         await interaction.response.send_message(f"⚠️ O membro {membro.mention} não possui o cargo {cargo.mention}.", ephemeral=True)
@@ -509,64 +429,75 @@ async def definir_meta(interaction: discord.Interaction, area: app_commands.Choi
 
 
 # ==========================================
-# 8. PAINEL DE GESTÃO EXCLUSIVO (/PAINEL) - RESTRITO POR CARGO
+# 8. PAINEL MESTRE DE GESTÃO E AUDITORIA (DUPLO EMBED)
 # ==========================================
 CARGOS_PERMITIDOS = [1542240355376832534, 1542240355393601589]
 
-class PainelAtalhosView(discord.ui.View):
+class PainelDuploView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Meus logs", style=discord.ButtonStyle.primary, emoji="📊")
-    async def meus_logs(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("📊 A carregar os seus logs de auditoria...", ephemeral=True)
+    # --- CAMADA SUPERIOR ---
+    @discord.ui.button(label="Aprovar Avals", style=discord.ButtonStyle.success, emoji="⏳", row=0)
+    async def btn_aprovar_avals(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("📥 A carregar os pedidos de avals pendentes para aprovação...", ephemeral=True)
 
-    @discord.ui.button(label="Minhas metas", style=discord.ButtonStyle.green, emoji="🎖️")
-    async def minhas_metas(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🎖️ A carregar o progresso das suas metas...", ephemeral=True)
+    @discord.ui.button(label="Registros de Vendas", style=discord.ButtonStyle.primary, emoji="💼", row=0)
+    async def btn_reg_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("📊 A puxar todos os registos de vendas efetuados no sistema...", ephemeral=True)
 
-    @discord.ui.button(label="Ranking", style=discord.ButtonStyle.secondary, emoji="🏆")
-    async def ranking(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("🏆 A carregar o ranking geral...", ephemeral=True)
+    @discord.ui.button(label="Registros de Cargos", style=discord.ButtonStyle.primary, emoji="👤", row=0)
+    async def btn_reg_cargos(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("🛡️ A puxar o histórico de adição e remoção de cargos...", ephemeral=True)
 
-@bot.tree.command(name="painel", description="Painel restrito de auditoria, vendas, saldos e histórico.")
+    # --- CAMADA INFERIOR ---
+    @discord.ui.button(label="Edição de Vendas", style=discord.ButtonStyle.secondary, emoji="✏️", row=1)
+    async def btn_edicao_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("✏️ A carregar o registo de todas as edições de vendas...", ephemeral=True)
+
+    @discord.ui.button(label="Apagação de Vendas", style=discord.ButtonStyle.danger, emoji="🗑️", row=1)
+    async def btn_apagar_vendas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("🗑️ A carregar o histórico de vendas apagadas...", ephemeral=True)
+
+    @discord.ui.button(label="Log de Comandos", style=discord.ButtonStyle.secondary, emoji="📜", row=1)
+    async def btn_log_comandos(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("📜 A puxar o registo de utilização de comandos...", ephemeral=True)
+
+@bot.tree.command(name="painel", description="Painel mestre restrito de auditoria, aprovações e registos.")
 async def painel(interaction: discord.Interaction):
     tem_cargo = any(role.id in CARGOS_PERMITIDOS for role in interaction.user.roles)
     if not tem_cargo and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("❌ Acesso negado. Apenas membros com os cargos autorizados podem visualizar este painel.", ephemeral=True)
         return
 
-    embed = discord.Embed(
-        title="◆ CEx › PAINEL DE AUDITORIA E GESTÃO",
-        description="Painel exclusivo de controlo administrativo e financeiro.",
+    # Embed 1: Camada Superior (Aprovações e Registos Principais)
+    embed1 = discord.Embed(
+        title="◆ CEx › PAINEL DE GESTÃO E APROVAÇÕES (1/2)",
+        description=(
+            "Painel de controlo administrativo principal.\n\n"
+            "⏳ **Aprovar Avals:** Gere e aprove os pedidos de afastamento pendentes.\n"
+            "💼 **Registos de Vendas:** Puxa o histórico de todas as vendas registadas.\n"
+            "👤 **Registos de Cargos:** Mostra quem adicionou ou removeu cargos na equipe."
+        ),
+        color=discord.Color.green()
+    )
+
+    # Embed 2: Camada Inferior (Auditoria de Edições, Eliminações e Comandos)
+    embed2 = discord.Embed(
+        title="◆ CEx › PAINEL DE AUDITORIA E HISTÓRICO (2/2)",
+        description=(
+            "Painel de rastreio e auditoria de alterações.\n\n"
+            "✏️ **Edição de Vendas:** Registo de quem alterou dados de vendas.\n"
+            "🗑️ **Apagação de Vendas:** Histórico de registos de vendas eliminados.\n"
+            "📜 **Log de Comandos:** Auditoria completa de comandos executados."
+        ),
         color=discord.Color.dark_theme()
     )
+    embed2.set_footer(text="CEx · Sistema de Auditoria Interna Restrito")
 
-    embed.add_field(
-        name="📊 1. Ranking & Auditoria de Atividades",
-        value=(
-            "• **Registos de Vendas:** Histórico completo de vendas efetuadas.\n"
-            "• **Edições e Eliminações:** Registo de quem editou ou apagou vendas.\n"
-            "• **Gestão de Cargos:** Auditoria de quem adicionou ou removeu cargos.\n"
-            "• **Ranking Geral:** Desempenho geral da equipe por volume."
-        ),
-        inline=False
-    )
-
-    embed.add_field(
-        name="💰 2. Saldos & Estatísticas Financeiras",
-        value=(
-            "• **Saldo de Vendedores:** Consulta detalhada de valores em aberto.\n"
-            "• **Comissões Pagas:** Total acumulado e distribuído por contador.\n"
-            "• **Metas Atingidas:** Progresso diário e semanal por colaborador."
-        ),
-        inline=False
-    )
-
-    embed.set_footer(text="CEx · Sistema de Auditoria Interna (Exclusivo)")
-    
-    view = PainelAtalhosView()
-    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    view = PainelDuploView()
+    # Envia os dois embeds juntos na mesma mensagem privada (ephemeral)
+    await interaction.response.send_message(embeds=[embed1, embed2], view=view, ephemeral=True)
 
 
 # Iniciar o servidor web e o bot
