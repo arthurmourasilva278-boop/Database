@@ -222,8 +222,24 @@ async def painel_aval(interaction: discord.Interaction):
 
 
 # ==========================================
-# 4. MÓDULO DE VENDAS E ENTREGAS
+# 4. MÓDULO DE VENDAS, APROVAÇÃO E ATALHOS DO VENDEDOR
 # ==========================================
+class VendedorAtalhosView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Meus logs", style=discord.ButtonStyle.primary, emoji="📊")
+    async def meus_logs(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("📊 A carregar os seus logs de vendas e histórico...", ephemeral=True)
+
+    @discord.ui.button(label="Minhas metas", style=discord.ButtonStyle.green, emoji="🎖️")
+    async def minhas_metas(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("🎖️ A carregar o progresso das suas metas e barra de progresso...", ephemeral=True)
+
+    @discord.ui.button(label="Ranking", style=discord.ButtonStyle.secondary, emoji="🏆")
+    async def ranking(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("🏆 A carregar o ranking geral da equipe...", ephemeral=True)
+
 class EntregaView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -318,18 +334,21 @@ async def registrar_venda(interaction: discord.Interaction, vendedor: discord.Me
     codigo_venda = f"#CEx-{random.randint(10000, 99999)}"
 
     embed = discord.Embed(
-        title=f"◆ CEx › REGISTRO DE VENDA · {codigo_venda}",
-        description=f"💼 **Nova venda registada com sucesso!**\n\n"
+        title=f"◆ CEx › PAGAMENTO APROVADO · {codigo_venda}",
+        description=f"✅ **Venda aprovada e registada com sucesso!**\n\n"
                     f"👤 **Vendedor:** {vendedor.mention}\n"
                     f"🤝 **Cliente:** {cliente}\n"
                     f"💰 **Valor:** {valor}\n"
-                    f"🧾 **Código da Venda:** `{codigo_venda}`\n\n"
-                    f"*Para apagar esta venda, use `/apagar_venda` informando o código.*",
-        color=discord.Color.blue()
+                    f"💸 **Comissão do Vendedor:** (Calculada automaticamente)\n"
+                    f"🎖️ **Meta Atualizada:** [🟩🟩🟩🟩⬛] Progresso registado\n"
+                    f"🧾 **Código:** `{codigo_venda}`",
+        color=discord.Color.green()
     )
     embed.set_image(url=comprovante.url)
     
-    await interaction.response.send_message(embed=embed)
+    view = VendedorAtalhosView()
+    await interaction.channel.send(embed=embed, view=view)
+    await interaction.response.send_message("Venda aprovada e notificação enviada com os atalhos do vendedor!", ephemeral=True)
 
 
 @bot.tree.command(name="apagar_venda", description="Apaga um registo de venda através do código.")
@@ -470,7 +489,7 @@ async def painel(interaction: discord.Interaction):
         await interaction.response.send_message("❌ Acesso negado. Apenas membros com os cargos autorizados podem visualizar este painel.", ephemeral=True)
         return
 
-    # Embed 1: Camada Superior (Aprovações e Registos Principais)
+    # Embed 1: Camada Superior
     embed1 = discord.Embed(
         title="◆ CEx › PAINEL DE GESTÃO E APROVAÇÕES (1/2)",
         description=(
@@ -482,7 +501,7 @@ async def painel(interaction: discord.Interaction):
         color=discord.Color.green()
     )
 
-    # Embed 2: Camada Inferior (Auditoria de Edições, Eliminações e Comandos)
+    # Embed 2: Camada Inferior
     embed2 = discord.Embed(
         title="◆ CEx › PAINEL DE AUDITORIA E HISTÓRICO (2/2)",
         description=(
@@ -496,7 +515,6 @@ async def painel(interaction: discord.Interaction):
     embed2.set_footer(text="CEx · Sistema de Auditoria Interna Restrito")
 
     view = PainelDuploView()
-    # Envia os dois embeds juntos na mesma mensagem privada (ephemeral)
     await interaction.response.send_message(embeds=[embed1, embed2], view=view, ephemeral=True)
 
 
