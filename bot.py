@@ -72,12 +72,12 @@ async def painel_nick(interaction: discord.Interaction):
         title="◆ CEx > Registro",
         description="👤 **REGISTRO DE NICK ROBLOX**\n\n⭐ Cadastre aqui o seu **nick do Roblox**.\n\n"
                     "────────────────────────\n"
-                    "└ É o nome que aparece no **organograma** da equipe.\n"
-                    "└ Sem ele você **não consegue registrar** a sua venda.\n"
-                    "└ Leva 10 segundos e só precisa ser feito **uma vez**.\n\n"
+                    "└ É o nome que aparece no **organograma** da equipe[span_0](start_span)[span_0](end_span).\n"
+                    "└ Sem ele você **não consegue registrar** a sua venda[span_1](start_span)[span_1](end_span).\n"
+                    "└ Leva 10 segundos e só precisa ser feito **uma vez**[span_2](start_span)[span_2](end_span).\n\n"
                     "────────────────────────\n"
-                    "*Trocou de nick no jogo? Clique de novo e atualize.*\n\n"
-                    "CEx · use letras, números e _ (3 a 20 caracteres)",
+                    "*Trocou de nick no jogo? Clique de novo e atualize*[span_3](start_span)[span_3](end_span).\n\n"
+                    "CEx · use letras, números e _ (3 a 20 caracteres)[span_4](start_span)[span_4](end_span)",
         color=discord.Color.dark_embed()
     )
     view = NickView()
@@ -102,14 +102,14 @@ async def painel_precos(interaction: discord.Interaction):
     embed = discord.Embed(
         title="◆ CEx › Tabela de preços",
         description="◆ **Dono de Divisão**\n\n"
-                    "┗ BPE — **R$ 850** · mín R$ 700\n"
-                    "┗ CIE — **R$ 850** · mín R$ 700\n"
-                    "┗ BAC — **R$ 1.000** · mín R$ 850\n"
-                    "┗ BFE — **R$ 1.000** · mín R$ 850\n"
-                    "┗ Criar Divisão — **R$ 8.000** · preço único\n\n"
+                    "┗ BPE — **R$ 850** · mín R$ 700[span_5](start_span)[span_5](end_span)\n"
+                    "┗ CIE — **R$ 850** · mín R$ 700[span_6](start_span)[span_6](end_span)\n"
+                    "┗ BAC — **R$ 1.000** · mín R$ 850[span_7](start_span)[span_7](end_span)\n"
+                    "┗ BFE — **R$ 1.000** · mín R$ 850[span_8](start_span)[span_8](end_span)\n"
+                    "┗ Criar Divisão — **R$ 8.000** · preço único[span_9](start_span)[span_9](end_span)\n\n"
                     "────────────────────────\n"
-                    "ℹ️ **mín** = o mínimo que você pode cobrar\n"
-                    "5 produtos · preço oficial CEx · atualiza sozinha\n\n"
+                    "ℹ️ **mín** = o mínimo que você pode cobrar[span_10](start_span)[span_10](end_span)\n"
+                    "5 produtos · preço oficial CEx · atualiza sozinha[span_11](start_span)[span_11](end_span)\n\n"
                     "Sistema CEx · tabela de preços",
         color=discord.Color.purple()
     )
@@ -155,14 +155,14 @@ async def painel_aval(interaction: discord.Interaction):
     embed = discord.Embed(
         title="◆ CEx › Aval",
         description="⏳ **SOLICITAR AVAL**\n\n"
-                    "Vai ficar um tempo sem conseguir vender? Peça seu aval aqui.\n\n"
+                    "Vai ficar um tempo sem conseguir vender? Peça seu aval aqui[span_12](start_span)[span_12](end_span).\n\n"
                     "────────────────────────\n"
-                    "└ Enquanto o aval estiver ativo **você não é cobrado** pela meta.\n"
-                    "└ As semanas de aval **não contam** como falha.\n"
-                    "└ Um administrador precisa **aprovar** o pedido.\n\n"
+                    "└ Enquanto o aval estiver ativo **você não é cobrado** pela meta[span_13](start_span)[span_13](end_span).\n"
+                    "└ As semanas de aval **não contam** como falha[span_14](start_span)[span_14](end_span).\n"
+                    "└ Um administrador precisa **aprovar** o pedido[span_15](start_span)[span_15](end_span).\n\n"
                     "────────────────────────\n"
-                    "**Voltou antes do prazo?** Use o botão **Voltei** — não precisa pedir a ninguém.\n\n"
-                    "CEx · até 30 dias por pedido",
+                    "**Voltou antes do prazo?** Use o botão **Voltei** — não precisa pedir a ninguém[span_16](start_span)[span_16](end_span).\n\n"
+                    "CEx · até 30 dias por pedido[span_17](start_span)[span_17](end_span)",
         color=discord.Color.dark_embed()
     )
     view = AvalView()
@@ -176,31 +176,28 @@ async def painel_aval(interaction: discord.Interaction):
 class EntregaView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+        # Adicionando o botão de link de forma programática para evitar incompatibilidades de versão no decorador
+        self.add_item(discord.ui.Button(label="Ver venda", style=discord.ButtonStyle.link, url="https://discord.com", emoji="🔗"))
 
     @discord.ui.button(label="Eu entrego", style=discord.ButtonStyle.green, emoji="📦")
     async def eu_entrego(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message(f"📦 {interaction.user.mention} assumiu a entrega deste pedido!", ephemeral=False)
-
-    # Botão de URL corrigido usando Button nativo adicionado na view
-    @discord.ui.button(label="Ver venda", style=discord.ButtonStyle.link, url="https://discord.com", emoji="🔗")
-    async def ver_venda(self, interaction: discord.Interaction, button: discord.ui.Button):
-        pass
 
 @bot.tree.command(name="simular_venda", description="Simula um pedido de venda pendente de entrega.")
 @app_commands.default_permissions(administrator=True)
 async def simular_venda(interaction: discord.Interaction):
     embed = discord.Embed(
         title="◆ CEx › PEDIDO DE ENTREGA · #CEx-X5WPHQ",
-        description="⚠️ **Aguardando entrega · ninguém assumiu ainda**\n\n"
-                    "`@Venda Patente` · pedido aberto há 2 dias\n"
+        description="⚠️ **Aguardando entrega · ninguém assumiu ainda**[span_18](start_span)[span_18](end_span)\n\n"
+                    "`@Venda Patente` · pedido aberto há 2 dias[span_19](start_span)[span_19](end_span)\n"
                     "────────────────────────\n"
-                    "📦 **Produto** · Patente · Elite Secreta [ES] · Patente Elite\n"
-                    "🤝 **Entregar para** · Souza\n"
-                    "👤 **Vendedor** · `@SOUZA` · Roblox CEARENSE_BRO\n"
-                    "💰 **Valor** · R$ 30,00\n"
-                    "🧾 **Venda** · #CEx-X5WPHQ · registrada há 2 dias\n\n"
+                    "📦 **Produto** · Patente · Elite Secreta [ES] · Patente Elite[span_20](start_span)[span_20](end_span)\n"
+                    "🤝 **Entregar para** · Souza[span_21](start_span)[span_21](end_span)\n"
+                    "👤 **Vendedor** · `@SOUZA` · Roblox CEARENSE_BRO[span_22](start_span)[span_22](end_span)\n"
+                    "💰 **Valor** · R$ 30,00[span_23](start_span)[span_23](end_span)\n"
+                    "🧾 **Venda** · #CEx-X5WPHQ · registrada há 2 dias[span_24](start_span)[span_24](end_span)\n\n"
                     "────────────────────────\n"
-                    "└ Vai entregar? Clique em **Eu entrego** — o pedido fecha no seu nome. Só quem tem o cargo consegue.\n\n"
+                    "└ Vai entregar? Clique em **Eu entrego** — o pedido fecha no seu nome. Só quem tem o cargo consegue[span_25](start_span)[span_25](end_span).\n\n"
                     "CEx · entregas",
         color=discord.Color.gold()
     )
