@@ -1,12 +1,8 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+EMBED_COLOR = 0x1F8B4C  # Verde oficial do CEx System (#1F8B4C)
+BOT_FOOTER_TEXT = "CEx System"
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-COLOR_PRIMARY = 0xD4AF37  # Dourada
-COLOR_BACKGROUND = 0x0F172A
-COLOR_DETAILS = 0x24185E
-
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
