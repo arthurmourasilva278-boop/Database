@@ -1,8 +1,14 @@
-import datetime
 import discord
+from datetime import datetime
+from config.settings import EMBED_COLOR, BOT_FOOTER_TEXT
 
-class CExEmbed(discord.Embed):
-    def __init__(self, **kwargs):
-        super().__init__(color=kwargs.pop("color", 0xD4AF37), **kwargs)
-        self.timestamp = datetime.datetime.now(datetime.timezone.utc)
-        self.set_footer(text=f"CEx System • {self.timestamp.strftime('%d/%m/%Y %H:%M')}")
+def create_base_embed(title: str, description: str = None, category: str = None) -> discord.Embed:
+    embed = discord.Embed(
+        title=f"🟢 CEx │ {title}",
+        description=description,
+        color=EMBED_COLOR,
+        timestamp=datetime.utcnow()
+    )
+    footer_text = f"{BOT_FOOTER_TEXT} • {category}" if category else BOT_FOOTER_TEXT
+    embed.set_footer(text=footer_text)
+    return embed
